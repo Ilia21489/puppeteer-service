@@ -4,7 +4,12 @@ services:
     env: node
     plan: free
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node index.js
     envVars:
-      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
-        value: 'true'
+      - key: NODE_ENV
+        value: production
+    build:
+      aptDependencies:
+        - chromium-browser
+        - fonts-liberation
+   

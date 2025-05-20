@@ -1,7 +1,7 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
-const app = express();
 
+const app = express();
 app.use(express.json());
 
 app.post('/screenshot', async (req, res) => {
@@ -10,8 +10,8 @@ app.post('/screenshot', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox'],
-      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: true
     });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
@@ -22,7 +22,7 @@ app.post('/screenshot', async (req, res) => {
     res.set('Content-Type', 'image/png');
     res.send(screenshot);
   } catch (error) {
-    console.error(error);
+    console.error('Screenshot error:', error);
     res.status(500).send({ error: 'Failed to take screenshot' });
   }
 });
