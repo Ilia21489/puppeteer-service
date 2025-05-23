@@ -1,5 +1,5 @@
 const express = require('express');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer'); // <-- Убедитесь, что это "puppeteer", а не "puppeteer-core"
 
 const app = express();
 app.use(express.json());
@@ -13,30 +13,25 @@ app.post('/screenshot', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).send({ error: 'Missing URL' });
 
-  let browser; // Объявляем browser вне try, чтобы он был доступен в finally
+  let browser;
   try {
     browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      // Явно указываем путь к исполняемому файлу Chromium
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome',
-      // Используем новый headless-режим, как предлагает Puppeteer
+      // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome', // <--- ЭТУ СТРОКУ НУЖНО УДАЛИТЬ!
       headless: "new"
     });
 
     const page = await browser.newPage();
-    // Попробуем более "мягкое" ожидание загрузки страницы
-    await page.goto(url, { waitUntil: 'load' }); // Изменено с 'networkidle2' на 'load'
+    await page.goto(url, { waitUntil: 'load' });
 
-    const screenshot = await page.screenshot({ type: 'png' }); // encoding: 'binary' не нужен здесь, т.к. PNG уже бинарный
+    const screenshot = await page.screenshot({ type: 'png' });
 
     res.set('Content-Type', 'image/png');
     res.send(screenshot);
   } catch (error) {
     console.error('Screenshot error:', error);
-    // Добавим details для более информативного ответа в случае ошибки
     res.status(500).send({ error: 'Failed to take screenshot', details: error.message });
   } finally {
-    // Убедимся, что браузер всегда закрывается, чтобы избежать утечек памяти
     if (browser) {
       await browser.close();
     }
