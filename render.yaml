@@ -1,15 +1,7 @@
 services:
   - type: web
     name: puppeteer-service
-    env: node
+    env: docker
     plan: free
-    buildCommand: npm install
-    startCommand: node index.js
-    envVars:
-      - key: NODE_ENV
-        value: production
-    build:
-      aptDependencies:
-        - chromium-browser
-        - fonts-liberation
+    autoDeploy: true
    

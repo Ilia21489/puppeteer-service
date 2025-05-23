@@ -1,32 +1,25 @@
-FROM node:20-slim
-RUN apt-get update && apt-get install -y \
-  chromium \
-  ca-certificates \
-  fonts-liberation \
-  libappindicator3-1 \
-  libasound2 \
-  libatk-bridge2.0-0 \
-  libatk1.0-0 \
-  libcups2 \
-  libdbus-1-3 \
-  libgdk-pixbuf2.0-0 \
-  libnspr4 \
-  libnss3 \
-  libx11-xcb1 \
-  libxcomposite1 \
-  libxdamage1 \
-  libxrandr2 \
-  xdg-utils \
-  --no-install-recommends && \
-  rm -rf /var/lib/apt/lists/*
+# Используем официальный образ Puppeteer с Node.js и Chromium
+FROM ghcr.io/puppeteer/puppeteer:21.3.0
+
+# Вместо WORKDIR /app в этом образе уже есть /home/pptruser
+# Но мы все равно можем использовать /app для ясности, или просто работать в /home/pptruser
 
 WORKDIR /app
 
+# Копируем только те файлы, которые нужны для установки зависимостей
 COPY package.json ./
-COPY index.js ./
 
+# Устанавливаем зависимости
+# В этом образе Chromium уже есть, поэтому apt-get install chromium не нужен
 RUN npm install
 
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Копируем основной код
+COPY index.js ./
 
+# Устанавливать ENV PUPPETEER_EXECUTABLE_PATH в этом случае не нужно,
+# так как образ уже настроен на использование встроенного Chromium.
+# Если очень хочется убедиться, можно добавить:
+# ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome # Или другой путь внутри этого образа, который Puppeteer найдет сам
+
+# Запускаем приложение
 CMD ["node", "index.js"]
